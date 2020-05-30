@@ -6,18 +6,29 @@ from sklearn import preprocessing
 class DataManager():
     '''
     This  class handles all data preocessing steps
+    On class creation, have to specify whether to apply one hot encoding on dataset
     '''
     seedValue=123
     __separator=','
     __csvFileAllData='dataset_breastCancer.csv'
     __tgtCol = 'diagnosis'
+    __tgtCol_M = 'diagnosis_M'
+    __tgtCol_B = 'diagnosis_B'
     __dataFolder ='data'
 
-    def __init__(self):
-        pass
-        
+    def __init__(self, applyOHE):
+
+        self.applyOHE=applyOHE
+         
     def getTargetLable(self):
-        return DataManager.__tgtCol
+        '''
+        Return a list of 2 target lables when ohe hot encoding is applied
+        else return a list of a target lable
+        '''
+        if self.applyOHE:
+            return [DataManager.__tgtCol_M,DataManager.__tgtCol_B]
+        else:
+            return [DataManager.__tgtCol]
 
     def readData(self):
         '''
@@ -84,25 +95,37 @@ class DataManager():
 
     def applyEncodingToNonNumericData(self,inDataFrame):
         '''
-        Convert non numeric data to numeric
-        Return 1 Data Frames, df_le. Label encoding done on target label
+        Convert non numeric data to numeric. Encoding done on non numeric label
+        Returnlable encoded Data Frame, df_le if one hot encoding is not applied, else Return one hot encoed data frame
         
         df_le  : with only label encoding applied to all non numeric colums
+        df_ohe : with only one hot encoding applied to all non numeric colums
         
         '''
         df_le=inDataFrame.copy()
+        df_ohe=inDataFrame.copy()
         le=preprocessing.LabelEncoder()
         mask = inDataFrame.dtypes == np.object
         #All string columns
         strCols = inDataFrame.columns[mask]
         #All string columns which has only 2 values
         for aCol in strCols:
-            #  feature has 2 only values. So just use label encoder
-            df_le[aCol]=le.fit_transform(df_le[aCol])
+            # using one hot encoding
+            if self.applyOHE:
+                dummy=pd.get_dummies(df_ohe[aCol],prefix=aCol)
+                df_ohe=pd.concat([df_ohe,dummy],axis=1)
+                df_ohe=df_ohe.drop(aCol,axis=1)
+            else:
+                #  feature has 2 only values. So just use label encoder
+                df_le[aCol]=le.fit_transform(df_le[aCol])
+        
+        if self.applyOHE:
+            df_ohe.reset_index(drop = True, inplace = True)
+            return df_ohe
+        else:
+            df_le.reset_index(drop = True, inplace = True)
+            return df_le
 
-        df_le.reset_index(drop = True, inplace = True)
-
-        return df_le
     
     def scaleData(self, inDataFrame):
         '''
@@ -116,7 +139,12 @@ class DataManager():
         scaledf = scaler.fit_transform(dataFrame)
         dataFrame = pd.DataFrame(scaledf,columns=dataFrame.columns)
         #After scaling convert back Target label to int
-        dataFrame[DataManager.__tgtCol] = dataFrame[DataManager.__tgtCol].astype(np.int64)
+        if self.applyOHE:
+            dataFrame[DataManager.__tgtCol_M] = dataFrame[DataManager.__tgtCol_M].astype(np.int64)
+            dataFrame[DataManager.__tgtCol_B] = dataFrame[DataManager.__tgtCol_B].astype(np.int64)          
+        else:
+            dataFrame[DataManager.__tgtCol] = dataFrame[DataManager.__tgtCol].astype(np.int64)
+
         dataFrame.reset_index(drop = True, inplace = True)
         return dataFrame
     
