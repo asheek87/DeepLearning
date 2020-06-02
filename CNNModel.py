@@ -16,7 +16,6 @@ class CNNModel:
         self.__y_test=yTest
         self.__seed=123
     
-
     def __createVGG16BaseModel(self):
         '''
         Using a pretained model VGG16
@@ -47,7 +46,6 @@ class CNNModel:
 
         model.compile(loss='binary_crossentropy',
               optimizer=anOptimizer, #'rmsprop'
-            #   metrics=['accuracy']
               metrics=['accuracy',metrics.Precision(name = 'Precision'),metrics.Recall(name = 'Recall'),
               metrics.FalseNegatives(name = 'FN'),metrics.FalsePositives(name = 'FP'),
               metrics.TrueNegatives(name = 'TN'),metrics.TruePositives(name = 'TP')] 
@@ -98,8 +96,8 @@ class CNNModel:
 
         for train, test in kf.split(xData, yData):
             history=network.fit(xData[train], yData[train], epochs=bestParam.get('epochs'), 
-                                batch_size=bestParam.get('batch_size'),shuffle=True,verbose=1)
-            scores = network.evaluate(xData[test], yData[test], verbose=0)
+                                batch_size=bestParam.get('batch_size'),shuffle=True,verbose=0)
+            scores = network.evaluate(xData[test], yData[test], batch_size=bestParam.get('batch_size'),verbose=0)
             for i in range(0,len(network.metrics_names)):
                 adict.update({network.metrics_names[i]:scores[i]})
 

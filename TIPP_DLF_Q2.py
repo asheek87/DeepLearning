@@ -19,13 +19,12 @@ imgMan.procesImages()
 # imgMan.displayProcessImages()
 #%%
 X_Train,y_train,X_Test,y_test,X_Val,y_Val=imgMan.get_Train_Test_Val_Data()
-print(X_Train.shape)
-print(y_train.shape)
-print(X_Test.shape)
-print(y_test.shape)
-print(X_Val.shape)
-print(y_Val.shape)
-
+print('X_train shape: '+str(X_Train.shape))
+print('y_train shape: '+str(y_train.shape))
+print('X_test shape: '+str(X_Test.shape))
+print('y_test shape: '+str(y_test.shape))
+print('X_Val shape: '+str(X_Val.shape))
+print('y_Val shape: '+str(y_Val.shape))
 
 # %%
 cnnMod=CNNModel(imgMan.getSideDimension(),X_Train,y_train,X_Test,y_test)
@@ -39,24 +38,22 @@ hiddenUnit=[256,128]
 
 dictParam={'epochs':epoch,'batch_size':batSize,'anOptimizer':optimizers,'outActivation':outAct,'hidUnit':hiddenUnit}
 start=time.time()
-df_full,df_result,bestParam,bestScore,model=cnnMod.findOptimizeParamCV(dictParam,fold=2)
+df_full,df_result,bestParam,bestScore,model=cnnMod.findOptimizeParamCV(dictParam,fold=3)
 end=time.time()
 # %%
-print('Time taken for grid search is '+str(start-end)+" seconds")
+print('Time taken for grid search is '+str(end-start)+" seconds")
 # %%
 #Print full results to output_Q2/DF_Full_Result.xlsx
 df_full.to_excel(output2+"DF_Full_Result.xlsx")
-df_full
 # %%
+#Print partial results to output_Q2/DF_Partial_Result.xlsx
+df_result.to_excel(output2+"DF_Partial_Result.xlsx")
+df_result.head()
 # %%
 # Show the best parameter to be used after grid search
 bestParam
 df_param=pd.DataFrame([bestParam])
 df_param
-# %%
-#Print partial results to output_Q2/DF_Partial_Result.xlsx
-df_result.to_excel(output2+"DF_Partial_Result.xlsx")
-df_result.head()
 # %%
 # Show the best score after grid search
 print('Best accuracy after grid search on training data: '+str(bestScore))
@@ -68,16 +65,18 @@ print('Accuracy of grid search model on test data: '+str(res))
 #%%
 # Train new model with best parameters using full data set
 start=time.time()
-df,nw,hist=cnnMod.trainModel(bestParam,X_Train,y_train)
+df_metrics,network,hist=cnnMod.trainModel(bestParam,X_Train,y_train)
 end=time.time()
 #%%
 print('Time taken for training model is '+str(end-start)+" seconds")
 # %%
 #Show mertrics after training with best parameters
-df
+df_metrics
 #%%
-param= nw.evaluate(X_Test, y_test,batch_size=bestParam.get('batch_size'))
+#Evaluate trained network with test data
+param= network.evaluate(X_Test, y_test,batch_size=bestParam.get('batch_size'))
 #%%
+#Print results of test data
 print('Eval test loss:', param[0])
 print('Eval test accuracy:', param[1]*100)
 print('Eval test precision:', param[2]*100)
@@ -88,34 +87,51 @@ print('Eval test true negative:', param[6])
 print('Eval test true positive:', param[7])
 
 #%%
+# Display loss vs epoch graph for test Data. See \output_Q2\Loss.png
 analyser=Analyser(output2)
 analyser.plot_loss(hist,'Loss')  
 #%%
-analyser.plot_accuracy(hist,'Accuracy') 
+# Display loss vs epoch graph for test Data. See \output_Q2\Accuracy.png
+analyser.plot_accuracy(hist,'Accuracy')
+#%%
+#Evaluate trained network with validation data
+param= network.evaluate(X_Val, y_Val,batch_size=bestParam.get('batch_size'))
+#%%
+#Print results of validation data
+print('Eval test loss:', param[0])
+print('Eval test accuracy:', param[1]*100)
+print('Eval test precision:', param[2]*100)
+print('Eval test recall:', param[3]*100)
+print('Eval test false negative:', param[4])
+print('Eval test false positive:', param[5])
+print('Eval test true negative:', param[6])
+print('Eval test true positive:', param[7]) 
 #%%
 # Validate model using validation img
 # %matplotlib inline
 import matplotlib.pyplot as plt
 
-strLableList=imgMan.getStringlablesValList()
-index=0
-wrong=0
-right=0
-for anImage in X_Val:
-    actual = strLableList[index]
-    anImageExpand = np.expand_dims(anImage, axis=0)
-    prob = nw.predict(anImageExpand)
+wrong,right=0,0
+for index,anImage in enumerate(X_Val):
+    
+    actual = np.argmax(y_Val[index])
+    actualStr=imgMan.getStrKeyFromVal(actual)
+
+    prob = network.predict(np.expand_dims(anImage, axis=0))
     predictIndx = np.argmax(prob)
     predictStr=imgMan.getStrKeyFromVal(predictIndx)
-    if actual !=predictStr:
-        wrong=+1
-    if actual ==predictStr:
-        rignt=+1
-        # plt.imshow(anImage)
-        # plt.show()
-        # print('Actual img is: '+ actual)
-        # print('Probability:'+ str(predictIndx) )
-        # print('Predicted img is '+predictStr +'\n')
+
+    if actualStr !=predictStr:
+        # print(actual)
+        # print(predictIndx)
+        plt.imshow(anImage)
+        plt.show()
+        print('Actual img is: '+ actualStr)
+        print('Predicted img is '+predictStr +'\n')
+        wrong+=1
+    if actualStr ==predictStr:
+        right+=1
+
     index+=1
 print('Wrong '+str(wrong))
 print('Right '+str(right))
@@ -123,9 +139,14 @@ print('Right '+str(right))
 
 #%%
 import pickle
-
+#Save Image manager and network model
 data = [X_Test,y_test,X_Train,y_train,X_Val,y_Val]
+
 with open(output2+'Q2_Data.pickle', 'wb+') as out_file:
     pickle.dump(data, out_file)
+with open(output2+'Q2_ImageManager.pickle', 'wb+') as out_file:
+    pickle.dump(imgMan, out_file)
 
-nw.save(output2+"Q2_cNN_model.h5") 
+network.save(output2+"Q2_CNN_model.h5") 
+
+# %%

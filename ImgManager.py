@@ -21,13 +21,13 @@ class ImgManager():
         self.__myImgList=[]
         self.__myProcessImgTrainList=[]
         self.__myProcessImgIntLableTrainList=[]
-        self.__myProcessImgStrLableTrainList=[]
+
         self.__myProcessImgTestList=[]
         self.__myProcessImgIntLableTestList=[]
-        self.__myProcessImgStrLableTestList=[]
+
         self.__myProcessImgValList=[]
         self.__myProcessImgIntLableValList=[]
-        self.__myProcessImgStrLableValList=[]
+ 
         self.__dictLable={}
         self.test=testSize *ImgManager.__testSet
         self.__selectedDim=0
@@ -106,72 +106,56 @@ class ImgManager():
         Return None
         '''
         print('Processing all images... ')
-
+        
         for myImage in self.__myImgList:
             transformList=myImage.transform(self.__selectedDim)
-            for item in transformList:
+            for aTransformImg in transformList:
                 if(myImage.getGrpType()==ImgManager.__Train):
-                    self.__myProcessImgTrainList.append(item)
+                    self.__myProcessImgTrainList.append(aTransformImg)
                     self.__myProcessImgIntLableTrainList.append(myImage.getIntLable())
-                    self.__myProcessImgStrLableTrainList.append(myImage.getStrLable())
-                elif(myImage.getGrpType()==ImgManager.__Test):
-                    self.__myProcessImgTestList.append(item)
-                    self.__myProcessImgIntLableTestList.append(myImage.getIntLable())
-                    self.__myProcessImgStrLableTestList.append(myImage.getStrLable())
-                else:
-                    self.__myProcessImgValList.append(item)
-                    self.__myProcessImgIntLableValList.append(myImage.getIntLable())
-                    self.__myProcessImgStrLableValList.append(myImage.getStrLable())
 
+                elif(myImage.getGrpType()==ImgManager.__Test):
+                    self.__myProcessImgTestList.append(aTransformImg)
+                    self.__myProcessImgIntLableTestList.append(myImage.getIntLable())
+
+                else:
+                    self.__myProcessImgValList.append(aTransformImg)
+                    self.__myProcessImgIntLableValList.append(myImage.getIntLable())
 
         print('Test Images'+str(len(self.__myProcessImgTestList)))
         print('Train Images '+str(len(self.__myProcessImgTrainList)))
         print('Validation Images '+str(len(self.__myProcessImgValList)))
         print('Processing all images DONE ')
     
-    def displayProcessImages(self, noOfImages=5):
-        index=0
-        for img in self.__myProcessImgTrainList:
-            if(index<noOfImages):
-                cv2.imshow("img_"+str(index),img)
-            index+=1
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
-    
     #TRAIN
     def __getProcessedImagesTrainList(self):
         # convert to array and normalize the RGB values
         return np.array(self.__myProcessImgTrainList,dtype="float32")/255
+        
 
     def __getIntlablesTrainList(self):
         return to_categorical(np.array(self.__myProcessImgIntLableTrainList))
-    
-    def getStringlablesTrainList(self):
-        return np.array(self.__myProcessImgStrLableTrainList)
     
     #TEST
     def __getProcessedImagesTestList(self):
         # convert to array and normalize the RGB values
         return np.array(self.__myProcessImgTestList,dtype="float32")/255
+        
     
     def __getIntlablesTestList(self):
         #one-hot encoding on the labels
         return to_categorical(np.array(self.__myProcessImgIntLableTestList))
-
-    def getStringlablesTestList(self):
-        return np.array(self.__myProcessImgStrLableTestList)
     
     #Validation
     def __getProcessedImagesValList(self):
         # convert to array and normalize the RGB values
         return np.array(self.__myProcessImgValList,dtype="float32")/255
+        
     
     def __getIntlablesValList(self):
         #one-hot encoding on the labels
         return to_categorical(np.array(self.__myProcessImgIntLableValList))
 
-    def getStringlablesValList(self):
-        return np.array(self.__myProcessImgStrLableValList)
     
     def get_Train_Test_Val_Data(self):
         return self.__getProcessedImagesTrainList(),self.__getIntlablesTrainList(),self.__getProcessedImagesTestList(),self.__getIntlablesTestList(),self.__getProcessedImagesValList(),self.__getIntlablesValList()
