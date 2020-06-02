@@ -125,7 +125,7 @@ class ModelManager():
         dfMain = pd.DataFrame()
         adict={}
         count=0
-        underscore="_"
+
         for train, test in kf.split(xData, yData):
             history=network.fit(xData[train], yData[train], epochs=bestParam.get('epochs'), 
                                 batch_size=bestParam.get('batch_size'),shuffle=True,verbose=0)
