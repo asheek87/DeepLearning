@@ -6,6 +6,9 @@ from keras.utils import to_categorical
 
 
 class ImgManager():
+    '''
+    This class is reposnible to handle all image processing steps
+    '''
     __folder='pokemon'
     
     __testSet=10

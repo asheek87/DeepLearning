@@ -38,7 +38,7 @@ hiddenUnit=[256,128]
 
 dictParam={'epochs':epoch,'batch_size':batSize,'anOptimizer':optimizers,'outActivation':outAct,'hidUnit':hiddenUnit}
 start=time.time()
-df_full,df_result,bestParam,bestScore,model=cnnMod.findOptimizeParamCV(dictParam,fold=3)
+df_full,df_result,bestParam,bestScore,model=cnnMod.findOptimizeParamCV(dictParam,fold=2)
 end=time.time()
 # %%
 print('Time taken for grid search is '+str(end-start)+" seconds")
@@ -77,14 +77,14 @@ df_metrics
 param= network.evaluate(X_Test, y_test,batch_size=bestParam.get('batch_size'))
 #%%
 #Print results of test data
-print('Eval test loss:', param[0])
-print('Eval test accuracy:', param[1]*100)
-print('Eval test precision:', param[2]*100)
-print('Eval test recall:', param[3]*100)
-print('Eval test false negative:', param[4])
-print('Eval test false positive:', param[5])
-print('Eval test true negative:', param[6])
-print('Eval test true positive:', param[7])
+print('Test loss:', param[0])
+print('Test accuracy:', param[1]*100)
+print('Test precision:', param[2]*100)
+print('Test recall:', param[3]*100)
+print('Test false negative:', param[4])
+print('Test false positive:', param[5])
+print('Test true negative:', param[6])
+print('Test true positive:', param[7])
 
 #%%
 # Display loss vs epoch graph for test Data. See \output_Q2\Loss.png
@@ -98,14 +98,14 @@ analyser.plot_accuracy(hist,'Accuracy')
 param= network.evaluate(X_Val, y_Val,batch_size=bestParam.get('batch_size'))
 #%%
 #Print results of validation data
-print('Eval test loss:', param[0])
-print('Eval test accuracy:', param[1]*100)
-print('Eval test precision:', param[2]*100)
-print('Eval test recall:', param[3]*100)
-print('Eval test false negative:', param[4])
-print('Eval test false positive:', param[5])
-print('Eval test true negative:', param[6])
-print('Eval test true positive:', param[7]) 
+print('Validation loss:', param[0])
+print('Validation accuracy:', param[1]*100)
+print('Validation precision:', param[2]*100)
+print('Validation recall:', param[3]*100)
+print('Validation false negative:', param[4])
+print('Validationt false positive:', param[5])
+print('Validation true negative:', param[6])
+print('Validation true positive:', param[7]) 
 #%%
 # Validate model using validation img
 # %matplotlib inline

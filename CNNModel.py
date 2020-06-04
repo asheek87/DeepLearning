@@ -7,6 +7,9 @@ from sklearn.model_selection import StratifiedKFold, GridSearchCV,train_test_spl
 import pandas as pd
 
 class CNNModel:
+    '''
+    This class handles CNN mdel creation, training and parameter optimization
+    '''
     __outNode=5 # 5 types of pokemon to predict
     def __init__(self,sideDIM,XTrain,yTrain,XTest,yTest):
         self.__sideDIM=sideDIM
@@ -45,7 +48,7 @@ class CNNModel:
         model.add(Dense(CNNModel.__outNode, activation=outActivation)) #output layer
 
         model.compile(loss='binary_crossentropy',
-              optimizer=anOptimizer, #'rmsprop'
+              optimizer=anOptimizer, 
               metrics=['accuracy',metrics.Precision(name = 'Precision'),metrics.Recall(name = 'Recall'),
               metrics.FalseNegatives(name = 'FN'),metrics.FalsePositives(name = 'FP'),
               metrics.TrueNegatives(name = 'TN'),metrics.TruePositives(name = 'TP')] 
