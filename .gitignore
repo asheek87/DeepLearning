@@ -3,3 +3,6 @@
 output_Q2/Q2_CNN_model.h5
 output_Q2/Q2_Data.pickle
 output_Q2/Q2_ImageManager.pickle
+.ipynb_checkpoints/Analyser-checkpoint.py
+.ipynb_checkpoints/AnalyserQ2-checkpoint.py
+.ipynb_checkpoints/TIPP_DLF_Q2-checkpoint.ipynb
